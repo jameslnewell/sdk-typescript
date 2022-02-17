@@ -20,6 +20,7 @@ import { OpenTelemetrySinks, SpanName, SPAN_DELIMITER } from '@temporalio/interc
 import * as activities from './activities';
 import * as workflows from './workflows';
 import { RUN_INTEGRATION_TESTS } from './helpers';
+import { SpanStatusCode } from '@opentelemetry/api';
 
 if (RUN_INTEGRATION_TESTS) {
   test.serial('Otel interceptor spans are connected and complete', async (t) => {
@@ -86,6 +87,7 @@ if (RUN_INTEGRATION_TESTS) {
         parentSpanId === firstExecuteSpan?.spanContext().spanId
     );
     t.true(continueAsNewSpan !== undefined);
+    t.true(continueAsNewSpan!.status.code === SpanStatusCode.OK);
     const parentExecuteSpan = spans.find(
       ({ name, parentSpanId }) =>
         name === `${SpanName.WORKFLOW_EXECUTE}${SPAN_DELIMITER}smorgasbord` &&

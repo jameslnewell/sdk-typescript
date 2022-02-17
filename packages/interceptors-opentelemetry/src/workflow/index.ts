@@ -10,6 +10,7 @@ import {
   WorkflowExecuteInput,
   workflowInfo,
   ContinueAsNewInput,
+  ContinueAsNew,
   WorkflowInternalsInterceptor,
 } from '@temporalio/workflow';
 import { extractContextFromHeaders, headersWithContext } from '@temporalio/common/lib/otel';
@@ -52,7 +53,13 @@ export class OpenTelemetryInboundInterceptor implements WorkflowInboundCallsInte
   ): Promise<unknown> {
     const context = await extractContextFromHeaders(input.headers);
     const spanName = `${SpanName.WORKFLOW_EXECUTE}${SPAN_DELIMITER}${workflowInfo().workflowType}`;
-    return await instrument(this.tracer, spanName, () => next(input), context);
+    return await instrument(
+      this.tracer,
+      spanName,
+      () => next(input),
+      context,
+      (err) => err instanceof ContinueAsNew
+    );
   }
 }
 
